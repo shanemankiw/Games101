@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/john/Graphics/GAMES101/Assignment1/test/build",
+  "command": "/usr/bin/g++-7   -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=gnu++1z -o CMakeFiles/Rasterizer.dir/main.cpp.o -c /home/john/Graphics/GAMES101/Assignment1/test/main.cpp",
+  "file": "/home/john/Graphics/GAMES101/Assignment1/test/main.cpp"
+},
+{
+  "directory": "/home/john/Graphics/GAMES101/Assignment1/test/build",
+  "command": "/usr/bin/g++-7   -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=gnu++1z -o CMakeFiles/Rasterizer.dir/rasterizer.cpp.o -c /home/john/Graphics/GAMES101/Assignment1/test/rasterizer.cpp",
+  "file": "/home/john/Graphics/GAMES101/Assignment1/test/rasterizer.cpp"
+},
+{
+  "directory": "/home/john/Graphics/GAMES101/Assignment1/test/build",
+  "command": "/usr/bin/g++-7   -isystem /usr/local/include -isystem /usr/local/include/opencv  -g   -std=gnu++1z -o CMakeFiles/Rasterizer.dir/Triangle.cpp.o -c /home/john/Graphics/GAMES101/Assignment1/test/Triangle.cpp",
+  "file": "/home/john/Graphics/GAMES101/Assignment1/test/Triangle.cpp"
+}
+]
