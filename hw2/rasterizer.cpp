@@ -40,9 +40,38 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 }
 
 
-static bool insideTriangle(int x, int y, const Vector3f* _v)
+static bool insideTriangle(float x, float y, const Vector3f* _v)
 {   
     // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
+
+    Eigen::Vector3f p0, p1, p2, v01, v12, v20;
+    p0 << x - _v[0](0), y - _v[0](1), 0.0f;
+    p1 << x - _v[1](0), y - _v[1](1), 0.0f;
+    p2 << x - _v[2](0), y - _v[2](1), 0.0f;
+
+    v01 << _v[1](0) - _v[0](0), _v[1](1) - _v[0](1), 0.0f;
+    v12 << _v[2](0) - _v[1](0), _v[2](1) - _v[1](1), 0.0f;
+    v20 << _v[0](0) - _v[2](0), _v[0](1) - _v[2](1), 0.0f;
+
+    if ((p0.cross(v01))(2) < 0 && (p1.cross(v12))(2) < 0 && (p2.cross(v20))(2) < 0) return true;
+    else return false;
+
+}
+
+float insideTriangle_super(float x, float y, const Vector3f* _v)
+{   
+    // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
+    float pixel_value = 0.0f;
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (insideTriangle(x + 0.25 + i*0.5, y + 0.25 + j*0.5, _v)) pixel_value += 0.25;
+        }
+        
+    }
+    return pixel_value;
+
 }
 
 static std::tuple<float, float, float> computeBarycentric2D(float x, float y, const Vector3f* v)
@@ -104,18 +133,42 @@ void rst::rasterizer::draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf
 
 //Screen space rasterization
 void rst::rasterizer::rasterize_triangle(const Triangle& t) {
-    auto v = t.toVector4();
     
-    // TODO : Find out the bounding box of current triangle.
+    auto v = t.toVector4(); // homogeneous coordinates
+    
+    // initialize a min_max coordinates for bbox
+    std::array<Eigen::Vector2f, 2> bbox_x_y;
+    bbox_x_y[0] << std::numeric_limits<float>::infinity(), 0.0f;
+    bbox_x_y[1] << std::numeric_limits<float>::infinity(), 0.0f;
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (v[i](0) < bbox_x_y[0](0)) bbox_x_y[0](0) = v[i](0); // minimal x
+        if (v[i](0) > bbox_x_y[0](1)) bbox_x_y[0](1) = v[i](0); // maximal x
+
+        if (v[i](1) < bbox_x_y[1](0)) bbox_x_y[1](0) = v[i](0); // minimal y
+        if (v[i](1) > bbox_x_y[1](1)) bbox_x_y[1](1) = v[i](0); // maximal y
+    }
+    
+    
     // iterate through the pixel and find if the current pixel is inside the triangle
-
-    // If so, use the following code to get the interpolated z value.
-    //auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
-    //float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
-    //float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
-    //z_interpolated *= w_reciprocal;
-
-    // TODO : set the current pixel (use the set_pixel function) to the color of the triangle (use getColor function) if it should be painted.
+    for (int x = int(bbox_x_y[0](0));x < int(bbox_x_y[0](1));x++){
+        for (int y = int(bbox_x_y[1](0));y < int(bbox_x_y[1](1));y++){
+            if (insideTriangle(float(x)+0.5, float(y)+0.5, t.v)){
+                auto[alpha, beta, gamma] = computeBarycentric2D(x, y, t.v);
+                float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
+                z_interpolated *= w_reciprocal;
+                if (depth_buf[(height-1-y)*width + x] > z_interpolated){
+                    Eigen::Vector3f point, color;
+                    point << x, y, z_interpolated;
+                    color << t.getColor();
+                    set_pixel(point, color * insideTriangle_super(x,y,t.v));
+                    depth_buf[(height-1-y)*width + x] = z_interpolated;
+                }
+            }
+        }
+    }    
 }
 
 void rst::rasterizer::set_model(const Eigen::Matrix4f& m)
@@ -161,7 +214,6 @@ void rst::rasterizer::set_pixel(const Eigen::Vector3f& point, const Eigen::Vecto
     //old index: auto ind = point.y() + point.x() * width;
     auto ind = (height-1-point.y())*width + point.x();
     frame_buf[ind] = color;
-
 }
 
 // clang-format on

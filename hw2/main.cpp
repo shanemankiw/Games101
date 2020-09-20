@@ -46,7 +46,7 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
 
     Eigen::Matrix4f Mortho_s = Eigen::Matrix4f::Identity();
     //Mortho_t = ;
-    float t = -tan(eye_fov * PI/360.0) * zNear; // 1/2 eye_fov
+    float t = -tan(eye_fov * MY_PI/360.0) * zNear; // 1/2 eye_fov
     
     float r = aspect_ratio * t;
     Mortho_s(0,0) = 1.0f/r;
