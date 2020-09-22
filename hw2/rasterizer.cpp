@@ -146,8 +146,8 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
         if (v[i](0) < bbox_x_y[0](0)) bbox_x_y[0](0) = v[i](0); // minimal x
         if (v[i](0) > bbox_x_y[0](1)) bbox_x_y[0](1) = v[i](0); // maximal x
 
-        if (v[i](1) < bbox_x_y[1](0)) bbox_x_y[1](0) = v[i](0); // minimal y
-        if (v[i](1) > bbox_x_y[1](1)) bbox_x_y[1](1) = v[i](0); // maximal y
+        if (v[i](1) < bbox_x_y[1](0)) bbox_x_y[1](0) = v[i](1); // minimal y
+        if (v[i](1) > bbox_x_y[1](1)) bbox_x_y[1](1) = v[i](1); // maximal y
     }
     
     
